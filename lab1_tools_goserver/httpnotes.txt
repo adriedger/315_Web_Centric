@@ -1,5 +1,6 @@
-GET         Resource       HTTP/1.1\r\n        
-POST        /blah
+-method-    -resource-
+GET         /blah       HTTP/1.1\r\n        
+POST        
 PUT
 DELETE
 -------------------------------------------

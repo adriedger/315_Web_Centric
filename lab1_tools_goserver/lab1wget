@@ -1,2 +1,4 @@
 #!/bin/bash
 wget -S -q -O- textfiles.com/humor/cops.txt
+wget -S -q -O- validate.jsontest.com/?json={"course":"CMPT315"}
+wget --post-data="hello=world" -S -q -O- http://httpbin.org/post
