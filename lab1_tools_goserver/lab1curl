@@ -1,0 +1,2 @@
+#!/bin/bash
+curl textfiles.com/humor/cops.txt

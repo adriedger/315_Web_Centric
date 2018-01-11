@@ -1,0 +1,4 @@
+#!/bin/bash
+echo -en "GET /humor/cops.txt HTTP/1.1\r\nHost: textfiles.com\r\n\r\n" | nc textfiles.com 80
+echo -en "GET /?json={"course":"CMPT315"} HTTP/1.1\r\nHost: validate.jsontest.com\r\n\r\n" | nc validate.jsontest.com 80
+echo -en "POST /post HTTP/1.1\r\nHost: httpbin.org\r\nContent-Length: 12\r\n\r\nhello, world" | nc httpbin.org 80
