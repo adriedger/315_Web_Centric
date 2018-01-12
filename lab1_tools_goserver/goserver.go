@@ -19,14 +19,14 @@ func handleVariable(w http.ResponseWriter, r *http.Request){
             http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
             return
         }
-        fmt.Fprintf(w, "GET: %s\n", variable)
+//        fmt.Fprintf(w, "%s\n", variable)
     case "POST":
-        _, err := io.Copy(w, variable)
+        _, err := io.Copy(variable, r.Body)
         if err != nil {
             http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
             return
         }
-        fmt.Fprintf(w, "POST: %s\n", variable)
+//        fmt.Println("POST: %s", variable)
     default:
             http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
             return
