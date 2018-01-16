@@ -1,0 +1,44 @@
+/api/v1/students
+^
+POST body JSON
+     ^
+{student: {"name":"Bob"
+    "year":"1993"}}
+Responce: 201
+    Location: URI of new student
+        ^header
+    body:{student:{"id":123
+         "name":"Bob"
+         "year":"1993"}}
+    400 if cannot parse JSON 
+^
+GET
+Resp: 200
+Body:
+{.....}
+
+/api/v1/students/123 is created
+^
+GET
+
+-------------------------------------------------
+Best Practices
+- move complexity behind the ?
+- 3 associations max
+/api/v1/dogs/1234/owner?filter=current
+
+HTTP codes   ```````                                                       ```````
+Google Gdata:` 200 `  201   304   400   401   403   404   409   410        ` 500 `
+Netflix:     ` 200 `  201   304   400   401   403   404               412  ` 500 `
+Digg:        ` 200 `              400   401   403   404         410        ` 500 `   503
+             ```````                                                       ```````
+`:minimal set
+201->404 (from above) is recomended set
+
+- api in subdomain (api.service.com) or at resource (service.com/api)
+- ?fields=x,y,z returns partial responce
+- ?offset=X,limit=y returns delimited set of entries (pagination)
+- ?alt=json or incluse format in path /api/v1/students.json for multiple format support
+- myKey capitilization style
+- handle searching /students"q=x or for global searches /search?q=x
+
