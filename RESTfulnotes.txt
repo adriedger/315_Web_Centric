@@ -27,11 +27,11 @@ Best Practices
 - 3 associations max
 /api/v1/dogs/1234/owner?filter=current
 
-HTTP codes   ```````                                                       ```````
-Google Gdata:` 200 `  201   304   400   401   403   404   409   410        ` 500 `
-Netflix:     ` 200 `  201   304   400   401   403   404               412  ` 500 `
-Digg:        ` 200 `              400   401   403   404         410        ` 500 `   503
-             ```````                                                       ```````
+HTTP codes   ```````             ```````                                     ```````
+Google Gdata:` 200 `  201   304  ` 400 `  401   403   404   409   410        ` 500 `
+Netflix:     ` 200 `  201   304  ` 400 `  401   403   404               412  ` 500 `
+Digg:        ` 200 `             ` 400 `  401   403   404         410        ` 500 `   503
+             ```````             ```````                                     ```````
 `:minimal set
 201->404 (from above) is recomended set
 
