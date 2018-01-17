@@ -18,9 +18,11 @@
 package main
 
 import (
+    "fmt"
 	"net/http"
 	"sync"
-    "github.com/gorrila/mux"
+    "github.com/gorilla/mux"
+    "io"
 )
 
 // mutex exists to ensure safe access to the map "digits"
@@ -45,6 +47,7 @@ var digits map[int]string = map[int]string{
 // containing 204 (No Content). If the digit doesn't exist, it produces a header
 // containing 410 (Gone).
 func handleDeleteDigit(w http.ResponseWriter, r *http.Request) {
+
 	// code goes here
 }
 
@@ -53,15 +56,18 @@ func handleDeleteDigit(w http.ResponseWriter, r *http.Request) {
 // string in the response body, which will produce a header containing 200 (OK). If the
 // digit doesn't exist, it produces a header containing 410 (Gone).
 func handleGetDigit(w http.ResponseWriter, r *http.Request) {
-	// code goes here
+
+    // code goes here
 }
 
 // main creates a gorilla/mux router that handles the two routes described in the
 // introduction
 func main() {
     r := mux.NewRouter()
-    r.HandleFunc("api/v1/digits/",handleDeleteDigit.Methods("GET"))
-    
-    http.ListenAndServe(:8080, r)                        
+    r.HandleFunc("/api/v1/digits/",handleDeleteDigit).Methods("GET")
+    err := http.ListenAndServe(":8080", r)
+    if err != nil{
+        fmt.Println(err)
+    }
 	// code goes here
 }
