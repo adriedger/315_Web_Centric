@@ -4,11 +4,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"math/rand"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var mutex sync.Mutex
+
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+
+func randomStringGen(n int) string {
+	b := make([]byte, n)
+	for i := 0; i < n; i++ {
+		b[i] = chars[rand.Intn(len(chars))]
+	}
+	return string(b)
+}
 
 type User struct {
 	Name string
@@ -27,15 +39,14 @@ type Class struct {
 func handlePostClass(w http.ResponseWriter, r *http.Request) {
 	var jsonBlob = []byte(`[{"Name": "CMPT 101"}]`)
 	var classes []Class
-	//	class := Class{"", "9000", User{"", "1234"}}
 	err := json.Unmarshal(jsonBlob, &classes)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
-	classes[0].ID = "9000"
-	classes[0].Creator = User{"yo", "1234"}
+	classes[0].ID = randomStringGen(4)
+	classes[0].Creator = User{"yo", randomStringGen(4)}
 	//fmt.Printf("%+v", classes)
 	js, err := json.Marshal(classes[0])
 	if err != nil {
@@ -62,6 +73,7 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1/", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create/", handlePostClass).Methods("POST")
