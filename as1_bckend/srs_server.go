@@ -31,13 +31,30 @@ type Class struct {
 	Name    string
 	ID      string
 	Creator User
-	//	Joined  []User
+	Joined  []User
 	//	Questions	[]Question
-
 }
 
-func handlePostClass(w http.ResponseWriter, r *http.Request) {
-	var jsonBlob = []byte(`[{"Name": "CMPT 101"}]`)
+func handleGetClass(w http.ResponseWriter, r *http.Request) {
+	//	fmt.Println("yo")
+	/*var ids map[string]string = map[string]string {
+		"9001": "Alice"
+		"9002": "Bob"
+		"9003"; "Claire"
+	}*/
+	mURLVars := mux.Vars(r)
+
+	mutex.Lock()
+	if mURLVars["id"] == "9001" {
+		fmt.Println("over 9000!")
+	} else {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+	}
+	mutex.Unlock()
+}
+
+func handleCreateClass(w http.ResponseWriter, r *http.Request) {
+	var jsonBlob = []byte(`[{"Name": "CMPT 101", "Creator": {"Name": "Bob"}}]`)
 	var classes []Class
 	err := json.Unmarshal(jsonBlob, &classes)
 	if err != nil {
@@ -46,7 +63,7 @@ func handlePostClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	classes[0].ID = randomStringGen(4)
-	classes[0].Creator = User{"yo", randomStringGen(4)}
+	classes[0].Creator.ID = randomStringGen(4)
 	//fmt.Printf("%+v", classes)
 	js, err := json.Marshal(classes[0])
 	if err != nil {
@@ -62,7 +79,7 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 		CreateClassLink string
 		JoinClassLink   string
 	}
-	home := HomeOptions{"/api/v1/classes?q=create", "/api/v1/classes?q=join"}
+	home := HomeOptions{"/api/v1/classes/create", "/api/v1/classes/join"}
 	js, err := json.Marshal(home)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -75,8 +92,9 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 	router := mux.NewRouter()
-	router.HandleFunc("/api/v1/", handleGetHome).Methods("GET")
-	router.HandleFunc("/api/v1/classes/create/", handlePostClass).Methods("POST")
+	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
+	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
+	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
 
 	http.ListenAndServe(":8080", router)
 }
