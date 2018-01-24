@@ -1,11 +1,9 @@
 package main
 
 import (
-	//	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	//	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -24,12 +22,6 @@ func randomStringGen(n int) string {
 	return string(b)
 }
 
-/*
-type User struct {
-	Name string
-	ID   string
-}
-*/
 type Class struct {
 	Name       string
 	ID         string
@@ -39,43 +31,20 @@ type Class struct {
 }
 
 func handleJoinClass(w http.ResponseWriter, r *http.Request) {
-	//	var body *bytes.Buffer = &bytes.Buffer{}
-	//	_, err := io.Copy(body, r.Body)
-	/*
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			fmt.Println("error:", err)
-			return
-		}
-		fmt.Println(string(body))
-	*/
 	type Entry struct {
 		ClassID  string
 		Username string
 	}
-
 	var entry Entry
-	//	var jsonBlob []byte
-	//	_, err := io.Copy(jsonBlob, r.Body)
-	//	if err != nil {
-	//		http.Error(w, err.Error(), http.StatusInternalServerError)
-	//		fmt.Println("error:", err)
-	//		return
-	//	}
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&entry)
-	//	var jsonBlob = []byte(`[{"ClassID": "1234", "Username": "Bob"}]`)
-	/*
-		err = json.Unmarshal(body, &entry)
-	*/
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
 	fmt.Printf("%+v", entry)
-	// if entires[0].ClassID == ID in database, gen id for user, add user to class arr of users
+	// if entry.ClassID == ID in database, gen id for user, add user to class arr of users
 	// return status of join, class name and id
 }
 
@@ -92,18 +61,18 @@ func handleGetClass(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreateClass(w http.ResponseWriter, r *http.Request) {
-	var jsonBlob = []byte(`[{"Name": "CMPT 101"}]`)
-	var classes []Class
-	err := json.Unmarshal(jsonBlob, &classes)
+	var class Class
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&class)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
-	classes[0].ID = randomStringGen(4)
-	classes[0].CreatorKey = randomStringGen(4)
-	fmt.Printf("%+v", classes)
-	js, err := json.Marshal(classes[0])
+	class.ID = randomStringGen(4)
+	class.CreatorKey = randomStringGen(4)
+	//fmt.Printf("%+v", classes)
+	js, err := json.Marshal(class)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

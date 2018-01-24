@@ -1,0 +1,2 @@
+wget --post-data="{\"ClassID\":\"1234\",\"Username\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Name\":\"CMPT 101\"}" -O- -S -q localhost:8080/api/v1/classes/create
