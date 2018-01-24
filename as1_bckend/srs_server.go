@@ -1,9 +1,11 @@
 package main
 
 import (
+	//	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	//	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -22,26 +24,62 @@ func randomStringGen(n int) string {
 	return string(b)
 }
 
+/*
 type User struct {
 	Name string
 	ID   string
 }
-
+*/
 type Class struct {
-	Name    string
-	ID      string
-	Creator User
-	Joined  []User
+	Name       string
+	ID         string
+	CreatorKey string
+	Joined     []string
 	//	Questions	[]Question
 }
 
+func handleJoinClass(w http.ResponseWriter, r *http.Request) {
+	//	var body *bytes.Buffer = &bytes.Buffer{}
+	//	_, err := io.Copy(body, r.Body)
+	/*
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("error:", err)
+			return
+		}
+		fmt.Println(string(body))
+	*/
+	type Entry struct {
+		ClassID  string
+		Username string
+	}
+
+	var entry Entry
+	//	var jsonBlob []byte
+	//	_, err := io.Copy(jsonBlob, r.Body)
+	//	if err != nil {
+	//		http.Error(w, err.Error(), http.StatusInternalServerError)
+	//		fmt.Println("error:", err)
+	//		return
+	//	}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&entry)
+	//	var jsonBlob = []byte(`[{"ClassID": "1234", "Username": "Bob"}]`)
+	/*
+		err = json.Unmarshal(body, &entry)
+	*/
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Printf("%+v", entry)
+	// if entires[0].ClassID == ID in database, gen id for user, add user to class arr of users
+	// return status of join, class name and id
+}
+
 func handleGetClass(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Println("yo")
-	/*var ids map[string]string = map[string]string {
-		"9001": "Alice"
-		"9002": "Bob"
-		"9003"; "Claire"
-	}*/
 	mURLVars := mux.Vars(r)
 
 	mutex.Lock()
@@ -54,7 +92,7 @@ func handleGetClass(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCreateClass(w http.ResponseWriter, r *http.Request) {
-	var jsonBlob = []byte(`[{"Name": "CMPT 101", "Creator": {"Name": "Bob"}}]`)
+	var jsonBlob = []byte(`[{"Name": "CMPT 101"}]`)
 	var classes []Class
 	err := json.Unmarshal(jsonBlob, &classes)
 	if err != nil {
@@ -63,8 +101,8 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	classes[0].ID = randomStringGen(4)
-	classes[0].Creator.ID = randomStringGen(4)
-	//fmt.Printf("%+v", classes)
+	classes[0].CreatorKey = randomStringGen(4)
+	fmt.Printf("%+v", classes)
 	js, err := json.Marshal(classes[0])
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,6 +133,7 @@ func main() {
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
+	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
 
 	http.ListenAndServe(":8080", router)
 }
