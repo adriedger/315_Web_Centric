@@ -26,7 +26,4 @@ CREATE TABLE enrollment (
   UNIQUE(student_id, course_id)
 );
 
--- Using a local version of psql, connect to the database and
--- run the following command:
---
--- \copy assessment FROM './simplified.csv' WITH (FORMAT csv);
+-- test using psql < reinit.psql
