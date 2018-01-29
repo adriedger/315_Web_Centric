@@ -1,0 +1,32 @@
+DROP DATABASE IF EXISTS lab03;
+
+CREATE DATABASE lab03;
+
+\c lab03
+
+CREATE TABLE student (
+  student_id SERIAL PRIMARY KEY,
+  first_name text NOT NULL,
+  last_name text NOT NULL,
+  UNIQUE(first_name, last_name)
+);
+
+CREATE TABLE course (
+  course_id SERIAL PRIMARY KEY,
+  department text NOT NULL,
+  course_number integer NOT NULL,
+  section text NOT NULL,
+  UNIQUE(department, course_number, section)
+);
+
+CREATE TABLE enrollment (
+  enrollment SERIAL PRIMARY KEY,
+  student_id integer REFERENCES student(student_id),
+  course_id integer REFERENCES course(course_id),
+  UNIQUE(student_id, course_id)
+);
+
+-- Using a local version of psql, connect to the database and
+-- run the following command:
+--
+-- \copy assessment FROM './simplified.csv' WITH (FORMAT csv);
