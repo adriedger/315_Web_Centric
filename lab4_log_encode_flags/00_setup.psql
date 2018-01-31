@@ -1,0 +1,36 @@
+-- == DOCKER CONTAINER ========================================================
+
+-- Create the Docker container with the following command:
+--
+-- $ docker run -ti -p 5432:5432 --name postgres postgres
+
+-- == DATABASE ================================================================
+
+-- Create the database by sourcing this file within
+-- psql.
+--
+-- $ cat 00_setup.psql | docker exec -i postgres psql postgres postgres
+
+DROP DATABASE IF EXISTS assess;
+
+CREATE DATABASE assess;
+
+\c assess
+
+CREATE TABLE assessment (
+  account integer PRIMARY KEY,
+  address text,
+  value integer NOT NULL
+);
+
+-- == DATA ====================================================================
+
+-- If using a local version of psql, connect to the database and
+-- run the following command:
+--
+-- \copy assessment FROM './simplified.csv' WITH (FORMAT csv);
+
+-- If using a container for psql, run the following on the
+-- command line:
+--
+-- $ cat simplified.csv | docker exec -i postgres psql assess postgres -c 'COPY assessment FROM stdin WITH (FORMAT csv)'

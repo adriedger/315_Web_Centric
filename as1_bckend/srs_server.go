@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+//    "encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
 	"math/rand"
@@ -22,18 +23,34 @@ func randomStringGen(n int) string {
 	return string(b)
 }
 
+type Student struct {
+	StudentID     int    `db:"student_id"`
+	StudentName   string `db:"first_name"`
+}
+
 type Class struct {
-	Name       string
-	ID         string
+	ClassID    string
+	ClassName  string
 	CreatorKey string
-	Joined     []string
 	//	Questions	[]Question
 }
 
+type Enrollment struct {
+    ID          int
+    StudentID   int
+    ClassID     string
+}
+/*
+type Questions struct {
+    ID          int  
+    ClassID     string
+    QuestionID  string
+}
+*/
 func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 	type Entry struct {
 		ClassID  string
-		Username string
+		UserName string
 	}
 	var entry Entry
 	decoder := json.NewDecoder(r.Body)
@@ -69,16 +86,18 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	class.ID = randomStringGen(4)
+	class.ClassID = randomStringGen(4)
 	class.CreatorKey = randomStringGen(4)
 	//fmt.Printf("%+v", classes)
-	js, err := json.Marshal(class)
+	w.Header().Set("Content-Type", "application/json")
+    encoder := json.NewEncoder(w)
+//    encoder := xml.NewEncoder(w)
+	err = encoder.Encode(class)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
+	//w.Write(js)
 }
 
 func handleGetHome(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +116,7 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+    yo()
 	rand.Seed(time.Now().UnixNano())
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
