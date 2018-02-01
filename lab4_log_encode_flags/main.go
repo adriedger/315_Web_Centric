@@ -14,9 +14,9 @@ import (
 	"os"
 	"path"
 	"strconv"
-    "encoding/json"
-    "encoding/xml"
-    "io/ioutil"
+	//    "encoding/json"
+	//    "encoding/xml"
+	"io/ioutil"
 
 	"github.com/kr/pretty"
 )
@@ -41,15 +41,15 @@ Options:
 	flag.BoolVar(&minOnly, "m", false, "show the minimum value")
 	flag.BoolVar(&avgOnly, "a", false, "show only average value")
 	flag.BoolVar(&quiet, "q", false, "hide log messages")
-    flag.StringVar(&returnType, "f", "json", "choose return type of api")
+	flag.StringVar(&returnType, "f", "json", "choose return type of api")
 
-    flag.Parse()
-    
-    if quiet {
-        log.New(ioutil.Discard, "Status log: ", log.LstdFlags)
-    } else {    
-        log.New(os.Stdout, "Status log: ", log.LstdFlags)
-    }
+	flag.Parse()
+
+	if quiet {
+		log.New(ioutil.Discard, "Status log: ", log.LstdFlags)
+	} else {
+		log.New(os.Stdout, "Status log: ", log.LstdFlags)
+	}
 }
 
 func main() {
@@ -67,12 +67,12 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
-
-    encoder := json.NewEncoder(os.Stdout)
-    if returnType == "xml" {
-        encoder = xml.NewEncoder(os.Stdout)
-    } 
-
+	/*
+	   encoder := json.NewEncoder(os.Stdout)
+	   if returnType == "xml" {
+	       encoder = xml.NewEncoder(os.Stdout)
+	   }
+	*/
 	// add wildcard characters to each side of the pattern
 	otherArgs[0] = "%" + otherArgs[0] + "%"
 
@@ -112,5 +112,5 @@ func main() {
 		fmt.Println("Updated records:", count)
 	}
 
-    encoder.Encode(assessments)//write to writer when this is called
+	//    encoder.Encode(assessments)//write to writer when this is called
 }
