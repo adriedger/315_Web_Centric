@@ -1,0 +1,26 @@
+DROP DATABASE IF EXISTS as1_bckend;
+
+CREATE DATABASE as1_bckend;
+
+\c as1_bckend
+
+CREATE TABLE student (
+  student_id SERIAL PRIMARY KEY,
+  student_name text NOT NULL,
+  UNIQUE(student_name)
+);
+
+CREATE TABLE class (
+  class_id text PRIMARY KEY,
+  class_name text NOT NULL,
+  creator_key text NOT NULL,
+  UNIQUE(class_name)
+);
+
+CREATE TABLE enrollment (
+  enrollment SERIAL PRIMARY KEY,
+  student_id int REFERENCES student(student_id),
+  class_id text REFERENCES class(class_id),
+  UNIQUE(student_id, class_id)
+);
+-- test using psql < reinit.psql
