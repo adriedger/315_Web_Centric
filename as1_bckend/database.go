@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"os"
 )
 
 var Connect string = "dbname=as1_bckend user=postgres host=localhost port=5432 sslmode=disable"
@@ -32,14 +31,11 @@ func OpenDatabase() (*Database, error) {
 }
 
 func (db *Database) AddClass(class Class) error {
-	fmt.Println("here1")
-	fmt.Printf("%+v\n", class)
-	fmt.Println("here2")
+	//	fmt.Printf("%+v\n", class)
 	q := `INSERT INTO class VALUES(:class_id, :class_name, :creator_key)`
 	_, err := db.NamedExec(q, class)
 	if err != nil {
 		return err
-		os.Exit(1)
 	}
 	return nil
 }

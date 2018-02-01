@@ -13,8 +13,7 @@ CREATE TABLE student (
 CREATE TABLE class (
   class_id text PRIMARY KEY,
   class_name text NOT NULL,
-  creator_key text NOT NULL,
-  UNIQUE(class_name)
+  creator_key text NOT NULL
 );
 
 CREATE TABLE enrollment (

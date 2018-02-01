@@ -13,7 +13,7 @@ import (
 )
 
 //var mutex sync.Mutex
-var db Database
+var db *Database
 
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
@@ -127,7 +127,8 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	db, err := OpenDatabase()
+	var err error
+	db, err = OpenDatabase()
 	if err != nil {
 		fmt.Println("error: ", err)
 		return
