@@ -27,7 +27,7 @@ func randomStringGen(n int) string {
 
 type Student struct {
 	StudentID   int    `db:"student_id"`
-	StudentName string `db:"studnet_name"`
+	StudentName string `db:"student_name"`
 }
 
 //classid and creator are random 4 char strings, class id must be unique
@@ -65,20 +65,27 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Printf("%+v", entry)
-	// if entry.ClassID == ID in database, gen id for user, add user to class arr of users
 	// return status of join, class name and id
 }
 
 func handleGetClass(w http.ResponseWriter, r *http.Request) {
 	mURLVars := mux.Vars(r)
-
-	//	mutex.Lock()
-	if mURLVars["id"] == "9001" {
-		fmt.Println("over 9000!")
-	} else {
+	//returs a Class struct
+	class, err := db.GetClass(mURLVars["id"])
+	if err != nil {
 		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		//fmt.Println("error:", err)
+		return
 	}
-	//	mutex.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(class)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 func handleCreateClass(w http.ResponseWriter, r *http.Request) {

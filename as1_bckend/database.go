@@ -40,6 +40,19 @@ func (db *Database) AddClass(class Class) error {
 	return nil
 }
 
+func (db *Database) GetClass(class_id string) (Class, error) {
+	classes := []Class{}
+	q := `SELECT * FROM class WHERE class_id = $1`
+	err := db.Select(&classes, q, class_id)
+	if err != nil {
+		return Class{}, err
+	}
+	if len(classes) < 1 {
+		return Class{}, fmt.Errorf("database -> class does not exist")
+	}
+	return classes[0], nil
+}
+
 func yo() {
 	fmt.Println("yo")
 }
