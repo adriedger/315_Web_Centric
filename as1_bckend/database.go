@@ -83,6 +83,15 @@ func (db *Database) AddQuestion(question Question) error {
 	return nil
 }
 
+func (db *Database) AddResponse(response Response) error {
+	q := `INSERT INTO responses VALUES(:response, :question)`
+	_, err := db.NamedExec(q, response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func yo() {
 	fmt.Println("yo")
 }

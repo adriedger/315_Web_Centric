@@ -5,26 +5,27 @@ CREATE DATABASE as1_bckend;
 \c as1_bckend
 
 CREATE TABLE class (
-    class_id text PRIMARY KEY,
+    class_id text PRIMARY KEY NOT NULL,
     class_name text NOT NULL,
     creator_key text NOT NULL
 );
 
 CREATE TABLE enrollment (
-    enrollment SERIAL PRIMARY KEY,
+    enrol_id SERIAL PRIMARY KEY,
     class_id text REFERENCES class(class_id),
     student_name text NOT NULL
 );
 
 CREATE Table questions (
-    question text PRIMARY KEY,
+    question text PRIMARY KEY NOT NULL,
     class_id text REFERENCES class(class_id),
     answer text NOT NULL
 );
 
-CREATE Table responces (
-    responce text PRIMARY KEY,
+CREATE Table responses (
+    response text PRIMARY KEY,
     question text REFERENCES questions(question)
 );
 
+-- enrollment int REFERENCES enrollment(enrollment)
 -- test using psql < reinit.psql

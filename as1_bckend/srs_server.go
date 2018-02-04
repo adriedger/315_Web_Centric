@@ -34,7 +34,7 @@ type Class struct {
 }
 
 type Enrollment struct {
-	EnrollID    int    `db:"enrollment"`
+	EnrollID    int    `db:"enrol_id"`
 	ClassID     string `db:"class_id"`
 	StudentName string `db:"student_name"`
 }
@@ -45,11 +45,11 @@ type Question struct {
 	Answer  string `db:"answer"`
 }
 
-//responces to choose from for each question
+//responses to choose from for each question
 type Response struct {
-	Text        string `db:"responce"`
-	Question    string `db:"question"`
-	StudentName string `"db:"student_name"`
+	Answer   string `db:"response"`
+	Question string `db:"question"`
+	//	EnrollID string `db:"enrol_id"`
 }
 
 func handleGetHome(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +127,6 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//fmt.Printf("%+v", student)
-	//run db
 	err = db.JoinClass(mURLVars["id"], student.StudentName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -158,6 +157,25 @@ func handleCreateQuestion(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("QUESTION CREATED")
 }
 
+func handleAddResponse(w http.ResponseWriter, r *http.Request) {
+	var response Response
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Printf("%+v", response)
+	err = db.AddResponse(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("RESPONSE ADDED")
+}
+
 func main() {
 	var err error
 	db, err = OpenDatabase()
@@ -166,14 +184,15 @@ func main() {
 		return
 	}
 	defer db.Close()
-
 	rand.Seed(time.Now().UnixNano())
+
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
 	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")
 	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST")
+	router.HandleFunc("/api/v1/response", handleAddResponse).Methods("POST")
 
 	http.ListenAndServe(":8080", router)
 }
