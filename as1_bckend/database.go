@@ -51,6 +51,36 @@ func (db *Database) GetClass(class_id string) (Class, error) {
 		return Class{}, fmt.Errorf("database -> class does not exist")
 	}
 	return classes[0], nil
+	//add functionality to return all students enrolled in the class
+}
+
+func (db *Database) JoinClass(class_id string, student_name string) error {
+	//check if class exists, get class id
+	classes := []Class{}
+	q := `SELECT * FROM class WHERE class_id = $1`
+	err := db.Select(&classes, q, class_id)
+	if err != nil {
+		return err
+	}
+	if len(classes) < 1 {
+		return fmt.Errorf("database -> class does not exist")
+	}
+	//add class id and student name to enrollment
+	q = `INSERT INTO enrollment(class_id, student_name) VALUES($1, $2)`
+	_, err = db.Exec(q, class_id, student_name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *Database) AddQuestion(question Question) error {
+	q := `INSERT INTO questions VALUES(:question, :class_id, :answer)`
+	_, err := db.NamedExec(q, question)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func yo() {

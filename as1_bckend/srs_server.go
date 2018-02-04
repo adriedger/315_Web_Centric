@@ -8,11 +8,9 @@ import (
 	"math/rand"
 	"net/http"
 	//	"sync"
-	//	"github.com/jmoiron/sqlx"
 	"time"
 )
 
-//var mutex sync.Mutex
 var db *Database
 
 const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
@@ -26,96 +24,32 @@ func randomStringGen(n int) string {
 }
 
 type Student struct {
-	StudentID   int    `db:"student_id"`
 	StudentName string `db:"student_name"`
 }
 
-//classid and creator are random 4 char strings, class id must be unique
 type Class struct {
 	ClassID    string `db:"class_id"`
 	ClassName  string `db:"class_name"`
 	CreatorKey string `db:"creator_key"`
-	//	Questions	[]Question
 }
 
 type Enrollment struct {
-	ID        int    `db:"enrollment"`
-	StudentID int    `db:"student_id"`
-	ClassID   string `db:"class_id"`
+	EnrollID    int    `db:"enrollment"`
+	ClassID     string `db:"class_id"`
+	StudentName string `db:"student_name"`
 }
 
-/*
-type Questions struct {
-    ID          int
-    ClassID     string
-    QuestionID  string
-}
-*/
-func handleJoinClass(w http.ResponseWriter, r *http.Request) {
-	type Entry struct {
-		ClassID     string
-		StudentName string
-	}
-	var entry Entry
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&entry)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("error:", err)
-		return
-	}
-	fmt.Printf("%+v", entry)
-	// return status of join, class name and id
+type Question struct {
+	Text    string `db:"question"`
+	ClassID string `db:"class_id"`
+	Answer  string `db:"answer"`
 }
 
-func handleGetClass(w http.ResponseWriter, r *http.Request) {
-	mURLVars := mux.Vars(r)
-	//returs a Class struct
-	class, err := db.GetClass(mURLVars["id"])
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
-		//fmt.Println("error:", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(class)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-
-func handleCreateClass(w http.ResponseWriter, r *http.Request) {
-	var class Class
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&class)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("error:", err)
-		return
-	}
-	class.ClassID = randomStringGen(4)
-	class.CreatorKey = randomStringGen(4)
-	/*
-		add class to database, loop until no same id error
-	*/
-	err = db.AddClass(class)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("error:", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(class)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+//responces to choose from for each question
+type Response struct {
+	Text        string `db:"responce"`
+	Question    string `db:"question"`
+	StudentName string `"db:"student_name"`
 }
 
 func handleGetHome(w http.ResponseWriter, r *http.Request) {
@@ -133,6 +67,97 @@ func handleGetHome(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleCreateClass(w http.ResponseWriter, r *http.Request) {
+	var class Class
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&class)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	class.ClassID = randomStringGen(4)
+	class.CreatorKey = randomStringGen(4)
+
+	// loop until no same id error
+	err = db.AddClass(class)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(class)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func handleGetClass(w http.ResponseWriter, r *http.Request) {
+	mURLVars := mux.Vars(r)
+	//returs a Class struct
+	class, err := db.GetClass(mURLVars["id"])
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		fmt.Println("error:", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(class)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func handleJoinClass(w http.ResponseWriter, r *http.Request) {
+	mURLVars := mux.Vars(r)
+	var student Student
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&student)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	//fmt.Printf("%+v", student)
+	//run db
+	err = db.JoinClass(mURLVars["id"], student.StudentName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("JOINED")
+}
+
+func handleCreateQuestion(w http.ResponseWriter, r *http.Request) {
+	mURLVars := mux.Vars(r)
+	var question Question
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&question)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	question.ClassID = mURLVars["id"]
+	//fmt.Printf("%+v", question)
+	err = db.AddQuestion(question)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("QUESTION CREATED")
+}
+
 func main() {
 	var err error
 	db, err = OpenDatabase()
@@ -147,7 +172,8 @@ func main() {
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
-	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
+	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")
+	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST")
 
 	http.ListenAndServe(":8080", router)
 }

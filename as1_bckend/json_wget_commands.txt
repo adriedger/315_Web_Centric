@@ -1,2 +1,5 @@
 wget --post-data="{\"ClassID\":\"1234\",\"StudentName\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join
 wget --post-data="{\"ClassName\":\"CMPT 101\"}" -O- -S -q localhost:8080/api/v1/classes/create
+wget --post-data="{\"StudentName\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join/
+wget -O- -S -q localhost:8080/api/v1
+wget --post-data="Text":"2+2?" -O- -S -q localhost:8080/api/v1/questions/create/ wget --post-data="Answer":"4" -O- -S -q localhost:8080/api/v1/questions/create/

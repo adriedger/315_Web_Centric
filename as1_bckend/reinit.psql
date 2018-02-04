@@ -4,22 +4,27 @@ CREATE DATABASE as1_bckend;
 
 \c as1_bckend
 
-CREATE TABLE student (
-  student_id SERIAL PRIMARY KEY,
-  student_name text NOT NULL,
-  UNIQUE(student_name)
-);
-
 CREATE TABLE class (
-  class_id text PRIMARY KEY,
-  class_name text NOT NULL,
-  creator_key text NOT NULL
+    class_id text PRIMARY KEY,
+    class_name text NOT NULL,
+    creator_key text NOT NULL
 );
 
 CREATE TABLE enrollment (
-  enrollment SERIAL PRIMARY KEY,
-  student_id int REFERENCES student(student_id),
-  class_id text REFERENCES class(class_id),
-  UNIQUE(student_id, class_id)
+    enrollment SERIAL PRIMARY KEY,
+    class_id text REFERENCES class(class_id),
+    student_name text NOT NULL
 );
+
+CREATE Table questions (
+    question text PRIMARY KEY,
+    class_id text REFERENCES class(class_id),
+    answer text NOT NULL
+);
+
+CREATE Table responces (
+    responce text PRIMARY KEY,
+    question text REFERENCES questions(question)
+);
+
 -- test using psql < reinit.psql
