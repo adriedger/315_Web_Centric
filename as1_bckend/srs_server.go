@@ -201,8 +201,6 @@ func handleModifyResponse(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
-	//gotta delete all responses assosiated with question
-	//need key attemp to compare with class creator key, classid and question
 	var question Question
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&question)
@@ -211,7 +209,7 @@ func handleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	fmt.Printf("%+v", question)
+	//fmt.Printf("%+v", question)
 	err = db.DeleteQuestion(question)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -219,6 +217,48 @@ func handleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Println("QUESTION DELETED")
+}
+
+func handleGetQuestions(w http.ResponseWriter, r *http.Request) {
+	mURLVars := mux.Vars(r)
+	questions, err := db.GetQuestions(mURLVars["id"])
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		fmt.Println("error:", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(questions)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func handleGetResponses(w http.ResponseWriter, r *http.Request) {
+	//get keyattempt
+	var question Question
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&question)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	responses, err := db.GetResponses(question)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		fmt.Println("error:", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(responses)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func main() {
@@ -235,11 +275,13 @@ func main() {
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
-	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")
-	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST")
+	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")          //remove id in url
+	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST") //remove id in url
 	router.HandleFunc("/api/v1/responses/add", handleAddResponse).Methods("POST")
 	router.HandleFunc("/api/v1/responses/modify", handleModifyResponse).Methods("POST")
 	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("DELETE")
+	router.HandleFunc("/api/v1/classes/questions/{id:(?:[0-9]|[A-Z]){4}}", handleGetQuestions).Methods("GET")
+	router.HandleFunc("/api/v1/questions/responses", handleGetResponses).Methods("GET")
 
 	http.ListenAndServe(":8080", router)
 }

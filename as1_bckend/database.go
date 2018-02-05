@@ -137,6 +137,43 @@ func (db *Database) DeleteQuestion(question Question) error {
 	if err != nil {
 		return err
 	}
-	//delete responses?
 	return nil
+}
+
+func (db *Database) GetQuestions(class_id string) ([]Question, error) {
+	questions := []Question{}
+	q := `SELECT * FROM questions WHERE class_id = $1`
+	err := db.Select(&questions, q, class_id)
+	if err != nil {
+		return []Question{}, err
+	}
+	if len(questions) < 1 {
+		return []Question{}, fmt.Errorf("database -> class does not have any questions")
+	}
+	return questions, nil
+}
+
+func (db *Database) GetResponses(question Question) ([]Response, error) {
+	//check key attempt
+	classes := []Class{}
+	q := `SELECT * FROM class WHERE class_id = $1 AND creator_key = $2`
+	err := db.Select(&classes, q, question.ClassID, question.KeyAttempt)
+	if err != nil {
+		return []Response{}, err
+	}
+	if len(classes) < 1 {
+		return []Response{}, fmt.Errorf("database -> keys do not match")
+	}
+	//get responses
+	responses := []Response{}
+	q = `SELECT * FROM responses WHERE question = $1`
+	err = db.Select(&responses, q, question.Question)
+	if err != nil {
+		return []Response{}, err
+	}
+	if len(responses) < 1 {
+		return []Response{}, fmt.Errorf("database -> question does not have any responses")
+	}
+	return responses, nil
+	//add functionality to return all students enrolled in the class
 }

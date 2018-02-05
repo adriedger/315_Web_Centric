@@ -1,2 +1,0 @@
-setup_database.sql | psql -U postgres
-setup_database.sql | docker exec -i postgres psql -U postgres
