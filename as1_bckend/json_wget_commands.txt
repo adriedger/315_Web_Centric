@@ -1,6 +1,6 @@
 wget -O- -S -q localhost:8080/api/v1
 wget --post-data="{\"ClassName\":\"CMPT 101\"}" -O- -S -q localhost:8080/api/v1/classes/create
 wget -O- -S -q localhost:8080/api/v1/classes/
-wget --post-data="{\"StudentName\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join/
-wget --post-data="{\"Text\":\"2+2=?\",\"Answer\":\"4\"}" -O- -S -q localhost:8080/api/v1/questions/create/
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"3\"}" -O- -S -q localhost:8080/api/v1/response
+wget --post-data="{\"Username\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join/
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\"}" -O- -S -q localhost:8080/api/v1/questions/create/
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"3\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/response/add

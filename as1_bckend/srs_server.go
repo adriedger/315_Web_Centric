@@ -23,10 +23,6 @@ func randomStringGen(n int) string {
 	return string(b)
 }
 
-type Student struct {
-	StudentName string `db:"student_name"`
-}
-
 type Class struct {
 	ClassID    string `db:"class_id"`
 	ClassName  string `db:"class_name"`
@@ -34,22 +30,21 @@ type Class struct {
 }
 
 type Enrollment struct {
-	EnrollID    int    `db:"enrol_id"`
-	ClassID     string `db:"class_id"`
-	StudentName string `db:"student_name"`
+	EnrollID string `db:"enroll_id"`
+	Username string `db:"username"`
+	ClassID  string `db:"class_id"`
 }
 
 type Question struct {
-	Text    string `db:"question"`
-	ClassID string `db:"class_id"`
-	Answer  string `db:"answer"`
+	Question string `db:"question"`
+	ClassID  string `db:"class_id"`
+	Answer   string `db:"answer"`
 }
 
-//responses to choose from for each question
 type Response struct {
 	Answer   string `db:"response"`
 	Question string `db:"question"`
-	//	EnrollID string `db:"enrol_id"`
+	EnrollID string `db:"enroll_id"`
 }
 
 func handleGetHome(w http.ResponseWriter, r *http.Request) {
@@ -118,22 +113,31 @@ func handleGetClass(w http.ResponseWriter, r *http.Request) {
 
 func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 	mURLVars := mux.Vars(r)
-	var student Student
+	var enrollment Enrollment
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&student)
+	err := decoder.Decode(&enrollment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
-	//fmt.Printf("%+v", student)
-	err = db.JoinClass(mURLVars["id"], student.StudentName)
+	enrollment.EnrollID = randomStringGen(4)
+	enrollment.ClassID = mURLVars["id"]
+	//fmt.Printf("%+v", enrollment)
+	err = db.JoinClass(enrollment)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
-	fmt.Println("JOINED")
+	//fmt.Println("JOINED")
+	w.Header().Set("Content-Type", "application/json")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(enrollment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func handleCreateQuestion(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +170,7 @@ func handleAddResponse(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	fmt.Printf("%+v", response)
+	//fmt.Printf("%+v", response)
 	err = db.AddResponse(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -192,7 +196,9 @@ func main() {
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
 	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")
 	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST")
-	router.HandleFunc("/api/v1/response", handleAddResponse).Methods("POST")
+	router.HandleFunc("/api/v1/response/add", handleAddResponse).Methods("POST")
+	//	router.HandleFunc("/api/v1/response/modify", handleModifyResponse).Methods("PUT")
+	//	router.HandleFunc("/api/v1/question/delete", handleDeleteQuestion).Methods("DELETE")
 
 	http.ListenAndServe(":8080", router)
 }

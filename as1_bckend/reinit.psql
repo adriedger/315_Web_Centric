@@ -5,15 +5,15 @@ CREATE DATABASE as1_bckend;
 \c as1_bckend
 
 CREATE TABLE class (
-    class_id text PRIMARY KEY NOT NULL,
+    class_id text PRIMARY KEY,
     class_name text NOT NULL,
     creator_key text NOT NULL
 );
 
 CREATE TABLE enrollment (
-    enrol_id SERIAL PRIMARY KEY,
-    class_id text REFERENCES class(class_id),
-    student_name text NOT NULL
+    enroll_id text PRIMARY KEY,
+    username text NOT NULL,
+    class_id text REFERENCES class(class_id)
 );
 
 CREATE Table questions (
@@ -23,7 +23,8 @@ CREATE Table questions (
 );
 
 CREATE Table responses (
-    response text PRIMARY KEY,
+    enroll_id text REFERENCES enrollment(enroll_id),
+    response text NOT NULL,
     question text REFERENCES questions(question)
 );
 

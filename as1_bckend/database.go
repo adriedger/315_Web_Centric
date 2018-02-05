@@ -54,20 +54,20 @@ func (db *Database) GetClass(class_id string) (Class, error) {
 	//add functionality to return all students enrolled in the class
 }
 
-func (db *Database) JoinClass(class_id string, student_name string) error {
+func (db *Database) JoinClass(enrollment Enrollment) error {
 	//check if class exists, get class id
 	classes := []Class{}
 	q := `SELECT * FROM class WHERE class_id = $1`
-	err := db.Select(&classes, q, class_id)
+	err := db.Select(&classes, q, enrollment.ClassID)
 	if err != nil {
 		return err
 	}
 	if len(classes) < 1 {
 		return fmt.Errorf("database -> class does not exist")
 	}
-	//add class id and student name to enrollment
-	q = `INSERT INTO enrollment(class_id, student_name) VALUES($1, $2)`
-	_, err = db.Exec(q, class_id, student_name)
+	//add class id and username to enrollment
+	q = `INSERT INTO enrollment VALUES(:enroll_id, :username, :class_id)`
+	_, err = db.NamedExec(q, enrollment)
 	if err != nil {
 		return err
 	}
@@ -84,14 +84,21 @@ func (db *Database) AddQuestion(question Question) error {
 }
 
 func (db *Database) AddResponse(response Response) error {
-	q := `INSERT INTO responses VALUES(:response, :question)`
-	_, err := db.NamedExec(q, response)
+	//check if response already exists for given enroll id
+	responses := []Response{}
+	q := `SELECT * FROM responses WHERE question = $1 AND enroll_id = $2`
+	err := db.Select(&responses, q, response.Question, response.EnrollID)
+	if err != nil {
+		return err
+	}
+	if len(responses) > 0 {
+		return fmt.Errorf("database -> response already exists for give question and enroll id")
+	}
+	//add response
+	q = `INSERT INTO responses VALUES(:enroll_id, :response, :question)`
+	_, err = db.NamedExec(q, response)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func yo() {
-	fmt.Println("yo")
 }
