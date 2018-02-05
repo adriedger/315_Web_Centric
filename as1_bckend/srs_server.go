@@ -36,9 +36,10 @@ type Enrollment struct {
 }
 
 type Question struct {
-	Question string `db:"question"`
-	ClassID  string `db:"class_id"`
-	Answer   string `db:"answer"`
+	Question   string `db:"question"`
+	ClassID    string `db:"class_id"`
+	Answer     string `db:"answer"`
+	KeyAttempt string `db:"key_attempt`
 }
 
 type Response struct {
@@ -180,6 +181,46 @@ func handleAddResponse(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("RESPONSE ADDED")
 }
 
+func handleModifyResponse(w http.ResponseWriter, r *http.Request) {
+	var response Response
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	//fmt.Printf("%+v", response)
+	err = db.ModifyResponse(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("RESPONSE MODIFIED")
+}
+
+func handleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
+	//gotta delete all responses assosiated with question
+	//need key attemp to compare with class creator key, classid and question
+	var question Question
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&question)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Printf("%+v", question)
+	err = db.DeleteQuestion(question)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	fmt.Println("QUESTION DELETED")
+}
+
 func main() {
 	var err error
 	db, err = OpenDatabase()
@@ -196,9 +237,9 @@ func main() {
 	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
 	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")
 	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST")
-	router.HandleFunc("/api/v1/response/add", handleAddResponse).Methods("POST")
-	//	router.HandleFunc("/api/v1/response/modify", handleModifyResponse).Methods("PUT")
-	//	router.HandleFunc("/api/v1/question/delete", handleDeleteQuestion).Methods("DELETE")
+	router.HandleFunc("/api/v1/responses/add", handleAddResponse).Methods("POST")
+	router.HandleFunc("/api/v1/responses/modify", handleModifyResponse).Methods("POST")
+	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("DELETE")
 
 	http.ListenAndServe(":8080", router)
 }

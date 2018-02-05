@@ -102,3 +102,41 @@ func (db *Database) AddResponse(response Response) error {
 	}
 	return nil
 }
+
+func (db *Database) ModifyResponse(response Response) error {
+	//modify response
+	q := `UPDATE responses SET response = :response WHERE enroll_id = :enroll_id AND question = :question`
+	res, err := db.NamedExec(q, response)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("database -> question/enroll id do not match")
+	}
+	return nil
+}
+
+func (db *Database) DeleteQuestion(question Question) error {
+	//check if key_attempt matches creator key
+	classes := []Class{}
+	q := `SELECT * FROM class WHERE class_id = $1 AND creator_key = $2`
+	err := db.Select(&classes, q, question.ClassID, question.KeyAttempt)
+	if err != nil {
+		return err
+	}
+	if len(classes) < 1 {
+		return fmt.Errorf("database -> keys do not match")
+	}
+	//delete question
+	q = `DELETE FROM questions WHERE question = :question AND class_id = :class_id`
+	_, err = db.NamedExec(q, question)
+	if err != nil {
+		return err
+	}
+	//delete responses?
+	return nil
+}

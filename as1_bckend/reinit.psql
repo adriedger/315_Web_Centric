@@ -25,7 +25,7 @@ CREATE Table questions (
 CREATE Table responses (
     enroll_id text REFERENCES enrollment(enroll_id),
     response text NOT NULL,
-    question text REFERENCES questions(question)
+    question text REFERENCES questions(question) ON DELETE CASCADE
 );
 
 -- enrollment int REFERENCES enrollment(enrollment)
