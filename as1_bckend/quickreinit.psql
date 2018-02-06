@@ -36,7 +36,7 @@ CREATE Table responses (
 );
 
 insert into class values('cmpt101', '1111');
-insert into class values('cmpt103', '1111');
+insert into class values('cmpt103', '2222');
 insert into enrollment(username, class_name) values('alice', 'cmpt101');
 insert into enrollment(username, class_name) values('bob', 'cmpt101');
 insert into enrollment(username, class_name) values('claire', 'cmpt101');

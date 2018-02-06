@@ -29,7 +29,6 @@ func OpenDatabase() (*Database, error) {
 }
 
 func (db *Database) AddClass(class Class) error {
-	//	fmt.Printf("%+v\n", class)
 	q := `INSERT INTO class VALUES(:class_name, :creator_key)`
 	_, err := db.NamedExec(q, class)
 	if err != nil {
@@ -38,20 +37,6 @@ func (db *Database) AddClass(class Class) error {
 	return nil
 }
 
-/*
-func (db *Database) GetClass(class_name string) (Class, error) {
-	classes := []Class{}
-	q := `SELECT * FROM class WHERE class_name = $1`
-	err := db.Select(&classes, q, class_name)
-	if err != nil {
-		return Class{}, err
-	}
-	if len(classes) < 1 {
-		return Class{}, fmt.Errorf("database -> class does not exist")
-	}
-	return classes[0], nil
-}
-*/
 func (db *Database) JoinClass(enrollment Enrollment) error {
 	q := `INSERT INTO enrollment(username, class_name) VALUES(:username, :class_name)`
 	_, err := db.NamedExec(q, enrollment)

@@ -2,12 +2,10 @@ package main
 
 import (
 	"encoding/json"
-	//    "encoding/xml"
 	"fmt"
 	"github.com/gorilla/mux"
 	"math/rand"
 	"net/http"
-	//	"sync"
 	"time"
 )
 
@@ -89,27 +87,6 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-func handleGetClass(w http.ResponseWriter, r *http.Request) {
-	mURLVars := mux.Vars(r)
-	//returs a Class struct
-	class, err := db.GetClass(mURLVars["id"])
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
-		fmt.Println("error:", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(class)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-}
-*/
 func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 	var enrollment Enrollment
 	decoder := json.NewDecoder(r.Body)
@@ -144,7 +121,6 @@ func handleAddQuestion(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	//fmt.Printf("%+v", question)
 	err = db.AddQuestion(question)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,7 +139,6 @@ func handleAddResponse(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	//fmt.Printf("%+v", response)
 	err = db.AddResponse(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -182,7 +157,6 @@ func handleModifyResponse(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	//fmt.Printf("%+v", response)
 	err = db.ModifyResponse(response)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -266,7 +240,6 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
-	//router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
 	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
 	router.HandleFunc("/api/v1/questions/create", handleAddQuestion).Methods("POST")
 	router.HandleFunc("/api/v1/responses/add", handleAddResponse).Methods("POST")

@@ -1,22 +1,22 @@
 wget -O- -S -q localhost:8080/api/v1
-wget --post-data="{\"ClassName\":\"CMPT 101\"}" -O- -S -q localhost:8080/api/v1/classes/create
-wget --post-data="{\"ClassName\":\"CMPT 103\"}" -O- -S -q localhost:8080/api/v1/classes/create
-wget --post-data="{\"Username\":\"Alice\"}" -O- -S -q localhost:8080/api/v1/classes/join/####
-wget --post-data="{\"Username\":\"Bob\"}" -O- -S -q localhost:8080/api/v1/classes/join/####
-wget --post-data="{\"Username\":\"Claire\"}" -O- -S -q localhost:8080/api/v1/classes/join/####
-wget --post-data="{\"Username\":\"Alice\"}" -O- -S -q localhost:8080/api/v1/classes/join/####
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/create/####
-wget --post-data="{\"Question\":\"3+3=?\",\"Answer\":\"6\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/create/####
-wget --post-data="{\"Question\":\"4+4=?\",\"Answer\":\"8\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/create/####
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"8\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/create/####
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"3\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/responses/add
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/responses/add
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"1000\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/responses/add
-wget --post-data="{\"Question\":\"3+3=?\",\"Answer\":\"1000\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/responses/add
-wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"EnrollID\":\"####\"}" -O- -S -q localhost:8080/api/v1/responses/modify
-wget --method=DELETE --body-data="{\"Question\":\"2+2=?\",\"ClassID\":\"####\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/delete
-wget -O- -S -q localhost:8080/api/v1/classes/questions/####
-wget -O- -S -q localhost:8080/api/v1/classes/questions/####
-wget --method=GET --body-data="{\"Question\":\"2+2=?\",\"ClassID\":\"####\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
-wget --method=GET --body-data="{\"Question\":\"3+3=?\",\"ClassID\":\"####\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
-wget --method=GET --body-data="{\"Question\":\"4+4=?\",\"ClassID\":\"####\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
+wget --post-data="{\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/create
+wget --post-data="{\"ClassName\":\"CMPT103\"}" -O- -S -q localhost:8080/api/v1/classes/create
+wget --post-data="{\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Username\":\"Bob\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Username\":\"Claire\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Username\":\"Alice\",\"ClassName\":\"CMPT103\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"KeyAttempt\":\"####\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/questions/create
+wget --post-data="{\"Question\":\"3+3=?\",\"Answer\":\"6\",\"KeyAttempt\":\"####\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/questions/create
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"8\",\"KeyAttempt\":\"####\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/questions/create
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"KeyAttempt\":\"####\",\"ClassName\":\"CMPT103\"}" -O- -S -q localhost:8080/api/v1/questions/create
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"3\",\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/add
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"300\",\"Username\":\"Bob\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/add
+wget --post-data="{\"Question\":\"3+3=?\",\"Response\":\"6\",\"Username\":\"Claire\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/add
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"3\",\"Username\":\"Alice\",\"ClassName\":\"CMPT103\"}" -O- -S -q localhost:8080/api/v1/responses/add
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"4\",\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/modify
+wget -O- -S -q localhost:8080/api/v1/classes/questions/CMPT101
+wget -O- -S -q localhost:8080/api/v1/classes/questions/CMPT103
+wget --method=GET --body-data="{\"Question\":\"2+2=?\",\"ClassName\":\"CMPT101\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
+wget --method=DELETE --body-data="{\"Question\":\"2+2=?\",\"ClassName\":\"CMPT101\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/delete
+wget -O- -S -q localhost:8080/api/v1/classes/questions/CMPT101
+wget --method=GET --body-data="{\"Question\":\"2+2=?\",\"ClassName\":\"CMPT101\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
