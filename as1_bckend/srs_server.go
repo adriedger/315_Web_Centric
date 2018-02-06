@@ -24,28 +24,27 @@ func randomStringGen(n int) string {
 }
 
 type Class struct {
-	ClassID    string `db:"class_id"`
 	ClassName  string `db:"class_name"`
 	CreatorKey string `db:"creator_key"`
 }
 
 type Enrollment struct {
-	EnrollID string `db:"enroll_id"`
-	Username string `db:"username"`
-	ClassID  string `db:"class_id"`
+	Username  string `db:"username"`
+	ClassName string `db:"class_name"`
 }
 
 type Question struct {
 	Question   string `db:"question"`
-	ClassID    string `db:"class_id"`
 	Answer     string `db:"answer"`
+	ClassName  string `db:"class_name"`
 	KeyAttempt string `db:"key_attempt`
 }
 
 type Response struct {
-	Answer   string `db:"response"`
-	Question string `db:"question"`
-	EnrollID string `db:"enroll_id"`
+	Response  string `db:"response"`
+	Question  string `db:"question"`
+	ClassName string `db:"class_name"`
+	Username  string `db:"username"`
 }
 
 func handleGetHome(w http.ResponseWriter, r *http.Request) {
@@ -72,10 +71,8 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	class.ClassID = randomStringGen(4)
 	class.CreatorKey = randomStringGen(4)
 
-	// loop until no same id error
 	err = db.AddClass(class)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -92,6 +89,7 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
 func handleGetClass(w http.ResponseWriter, r *http.Request) {
 	mURLVars := mux.Vars(r)
 	//returs a Class struct
@@ -111,9 +109,8 @@ func handleGetClass(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-
+*/
 func handleJoinClass(w http.ResponseWriter, r *http.Request) {
-	mURLVars := mux.Vars(r)
 	var enrollment Enrollment
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&enrollment)
@@ -122,8 +119,6 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	enrollment.EnrollID = randomStringGen(4)
-	enrollment.ClassID = mURLVars["id"]
 	//fmt.Printf("%+v", enrollment)
 	err = db.JoinClass(enrollment)
 	if err != nil {
@@ -131,7 +126,6 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	//fmt.Println("JOINED")
 	w.Header().Set("Content-Type", "application/json")
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(enrollment)
@@ -141,8 +135,7 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleCreateQuestion(w http.ResponseWriter, r *http.Request) {
-	mURLVars := mux.Vars(r)
+func handleAddQuestion(w http.ResponseWriter, r *http.Request) {
 	var question Question
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&question)
@@ -151,7 +144,6 @@ func handleCreateQuestion(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error:", err)
 		return
 	}
-	question.ClassID = mURLVars["id"]
 	//fmt.Printf("%+v", question)
 	err = db.AddQuestion(question)
 	if err != nil {
@@ -221,9 +213,9 @@ func handleDeleteQuestion(w http.ResponseWriter, r *http.Request) {
 
 func handleGetQuestions(w http.ResponseWriter, r *http.Request) {
 	mURLVars := mux.Vars(r)
-	questions, err := db.GetQuestions(mURLVars["id"])
+	questions, err := db.GetQuestions(mURLVars["name"])
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
@@ -248,7 +240,7 @@ func handleGetResponses(w http.ResponseWriter, r *http.Request) {
 	}
 	responses, err := db.GetResponses(question)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNoContent), http.StatusNoContent)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("error:", err)
 		return
 	}
@@ -274,13 +266,13 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
-	router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
-	router.HandleFunc("/api/v1/classes/join/{id:(?:[0-9]|[A-Z]){4}}", handleJoinClass).Methods("POST")          //remove id in url
-	router.HandleFunc("/api/v1/questions/create/{id:(?:[0-9]|[A-Z]){4}}", handleCreateQuestion).Methods("POST") //remove id in url
+	//router.HandleFunc("/api/v1/classes/{id:(?:[0-9]|[A-Z]){4}}", handleGetClass).Methods("GET")
+	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
+	router.HandleFunc("/api/v1/questions/create", handleAddQuestion).Methods("POST")
 	router.HandleFunc("/api/v1/responses/add", handleAddResponse).Methods("POST")
 	router.HandleFunc("/api/v1/responses/modify", handleModifyResponse).Methods("POST")
 	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("DELETE")
-	router.HandleFunc("/api/v1/classes/questions/{id:(?:[0-9]|[A-Z]){4}}", handleGetQuestions).Methods("GET")
+	router.HandleFunc("/api/v1/classes/questions/{name}", handleGetQuestions).Methods("GET")
 	router.HandleFunc("/api/v1/questions/responses", handleGetResponses).Methods("GET")
 
 	http.ListenAndServe(":8080", router)

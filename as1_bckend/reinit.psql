@@ -5,28 +5,33 @@ CREATE DATABASE as1_bckend;
 \c as1_bckend
 
 CREATE TABLE class (
-    class_id text PRIMARY KEY,
-    class_name text NOT NULL,
+    class_name text PRIMARY KEY NOT NULL,
     creator_key text NOT NULL
 );
 
 CREATE TABLE enrollment (
-    enroll_id text PRIMARY KEY,
+    enroll_id SERIAL PRIMARY KEY,
     username text NOT NULL,
-    class_id text REFERENCES class(class_id)
+    class_name text REFERENCES class(class_name),
+    UNIQUE(username, class_name)
 );
 
 CREATE Table questions (
-    question text PRIMARY KEY NOT NULL,
-    class_id text REFERENCES class(class_id),
-    answer text NOT NULL
+    question_id SERIAL PRIMARY KEY,
+    question text NOT NULL,
+    class_name text REFERENCES class(class_name),
+    answer text NOT NULL,
+    UNIQUE(question, class_name)
 );
 
 CREATE Table responses (
-    enroll_id text REFERENCES enrollment(enroll_id),
+    response_id SERIAL PRIMARY KEY,
+    enroll_id int REFERENCES enrollment(enroll_id),
     response text NOT NULL,
-    question text REFERENCES questions(question) ON DELETE CASCADE
+    question_id int REFERENCES questions(question_id) ON DELETE CASCADE,
+    class_name text,
+    username text,
+    question text,
+    UNIQUE(enroll_id, question_id)
 );
 
--- enrollment int REFERENCES enrollment(enrollment)
--- test using psql < reinit.psql

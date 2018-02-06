@@ -12,8 +12,6 @@ type Database struct {
 	*sqlx.DB
 }
 
-// OpenDatabase attempts to open the database specified by DataSource
-// and return a handle to it
 func OpenDatabase() (*Database, error) {
 	db := Database{}
 	var err error
@@ -32,7 +30,7 @@ func OpenDatabase() (*Database, error) {
 
 func (db *Database) AddClass(class Class) error {
 	//	fmt.Printf("%+v\n", class)
-	q := `INSERT INTO class VALUES(:class_id, :class_name, :creator_key)`
+	q := `INSERT INTO class VALUES(:class_name, :creator_key)`
 	_, err := db.NamedExec(q, class)
 	if err != nil {
 		return err
@@ -40,10 +38,11 @@ func (db *Database) AddClass(class Class) error {
 	return nil
 }
 
-func (db *Database) GetClass(class_id string) (Class, error) {
+/*
+func (db *Database) GetClass(class_name string) (Class, error) {
 	classes := []Class{}
-	q := `SELECT * FROM class WHERE class_id = $1`
-	err := db.Select(&classes, q, class_id)
+	q := `SELECT * FROM class WHERE class_name = $1`
+	err := db.Select(&classes, q, class_name)
 	if err != nil {
 		return Class{}, err
 	}
@@ -51,23 +50,11 @@ func (db *Database) GetClass(class_id string) (Class, error) {
 		return Class{}, fmt.Errorf("database -> class does not exist")
 	}
 	return classes[0], nil
-	//add functionality to return all students enrolled in the class
 }
-
+*/
 func (db *Database) JoinClass(enrollment Enrollment) error {
-	//check if class exists, get class id
-	classes := []Class{}
-	q := `SELECT * FROM class WHERE class_id = $1`
-	err := db.Select(&classes, q, enrollment.ClassID)
-	if err != nil {
-		return err
-	}
-	if len(classes) < 1 {
-		return fmt.Errorf("database -> class does not exist")
-	}
-	//add class id and username to enrollment
-	q = `INSERT INTO enrollment VALUES(:enroll_id, :username, :class_id)`
-	_, err = db.NamedExec(q, enrollment)
+	q := `INSERT INTO enrollment(username, class_name) VALUES(:username, :class_name)`
+	_, err := db.NamedExec(q, enrollment)
 	if err != nil {
 		return err
 	}
@@ -75,8 +62,19 @@ func (db *Database) JoinClass(enrollment Enrollment) error {
 }
 
 func (db *Database) AddQuestion(question Question) error {
-	q := `INSERT INTO questions VALUES(:question, :class_id, :answer)`
-	_, err := db.NamedExec(q, question)
+	//key attempt
+	classes := []Class{}
+	q := `SELECT * FROM class WHERE class_name = $1 AND creator_key = $2`
+	err := db.Select(&classes, q, question.ClassName, question.KeyAttempt)
+	if err != nil {
+		return err
+	}
+	if len(classes) < 1 {
+		return fmt.Errorf("database -> keys do not match")
+	}
+	//add question
+	q = `INSERT INTO questions(question, answer, class_name) VALUES(:question, :answer, :class_name)`
+	_, err = db.NamedExec(q, question)
 	if err != nil {
 		return err
 	}
@@ -84,28 +82,12 @@ func (db *Database) AddQuestion(question Question) error {
 }
 
 func (db *Database) AddResponse(response Response) error {
-	//check if response already exists for given enroll id
-	responses := []Response{}
-	q := `SELECT * FROM responses WHERE question = $1 AND enroll_id = $2`
-	err := db.Select(&responses, q, response.Question, response.EnrollID)
-	if err != nil {
-		return err
-	}
-	if len(responses) > 0 {
-		return fmt.Errorf("database -> response already exists for give question and enroll id")
-	}
 	//add response
-	q = `INSERT INTO responses VALUES(:enroll_id, :response, :question)`
-	_, err = db.NamedExec(q, response)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (db *Database) ModifyResponse(response Response) error {
-	//modify response
-	q := `UPDATE responses SET response = :response WHERE enroll_id = :enroll_id AND question = :question`
+	q := `INSERT INTO responses(response, enroll_id, question_id, class_name, username, question)
+		SELECT :response, e.enroll_id, q.question_id, :class_name, :username, :question
+		FROM enrollment AS e
+		INNER JOIN questions AS q ON e.class_name = :class_name AND e.username = :username
+		AND q.class_name = :class_name AND q.question = :question`
 	res, err := db.NamedExec(q, response)
 	if err != nil {
 		return err
@@ -115,7 +97,25 @@ func (db *Database) ModifyResponse(response Response) error {
 		return err
 	}
 	if count == 0 {
-		return fmt.Errorf("database -> question/enroll id do not match")
+		return fmt.Errorf("database -> given parametes do not exist")
+	}
+	return nil
+}
+
+func (db *Database) ModifyResponse(response Response) error {
+	//modify response
+	q := `UPDATE responses SET response = :response
+		 WHERE class_name = :class_name AND username = :username AND question = :question`
+	res, err := db.NamedExec(q, response)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf("database -> question with those params dosent exist")
 	}
 	return nil
 }
@@ -123,8 +123,8 @@ func (db *Database) ModifyResponse(response Response) error {
 func (db *Database) DeleteQuestion(question Question) error {
 	//check if key_attempt matches creator key
 	classes := []Class{}
-	q := `SELECT * FROM class WHERE class_id = $1 AND creator_key = $2`
-	err := db.Select(&classes, q, question.ClassID, question.KeyAttempt)
+	q := `SELECT * FROM class WHERE class_name = $1 AND creator_key = $2`
+	err := db.Select(&classes, q, question.ClassName, question.KeyAttempt)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (db *Database) DeleteQuestion(question Question) error {
 		return fmt.Errorf("database -> keys do not match")
 	}
 	//delete question
-	q = `DELETE FROM questions WHERE question = :question AND class_id = :class_id`
+	q = `DELETE FROM questions WHERE question = :question AND class_name = :class_name`
 	_, err = db.NamedExec(q, question)
 	if err != nil {
 		return err
@@ -140,10 +140,10 @@ func (db *Database) DeleteQuestion(question Question) error {
 	return nil
 }
 
-func (db *Database) GetQuestions(class_id string) ([]Question, error) {
+func (db *Database) GetQuestions(class_name string) ([]Question, error) {
 	questions := []Question{}
-	q := `SELECT * FROM questions WHERE class_id = $1`
-	err := db.Select(&questions, q, class_id)
+	q := `SELECT question, class_name FROM questions WHERE class_name = $1`
+	err := db.Select(&questions, q, class_name)
 	if err != nil {
 		return []Question{}, err
 	}
@@ -156,8 +156,8 @@ func (db *Database) GetQuestions(class_id string) ([]Question, error) {
 func (db *Database) GetResponses(question Question) ([]Response, error) {
 	//check key attempt
 	classes := []Class{}
-	q := `SELECT * FROM class WHERE class_id = $1 AND creator_key = $2`
-	err := db.Select(&classes, q, question.ClassID, question.KeyAttempt)
+	q := `SELECT * FROM class WHERE class_name = $1 AND creator_key = $2`
+	err := db.Select(&classes, q, question.ClassName, question.KeyAttempt)
 	if err != nil {
 		return []Response{}, err
 	}
@@ -166,8 +166,8 @@ func (db *Database) GetResponses(question Question) ([]Response, error) {
 	}
 	//get responses
 	responses := []Response{}
-	q = `SELECT * FROM responses WHERE question = $1`
-	err = db.Select(&responses, q, question.Question)
+	q = `SELECT class_name, username, question, response FROM responses WHERE question = $1 and class_name = $2`
+	err = db.Select(&responses, q, question.Question, question.ClassName)
 	if err != nil {
 		return []Response{}, err
 	}
@@ -175,5 +175,4 @@ func (db *Database) GetResponses(question Question) ([]Response, error) {
 		return []Response{}, fmt.Errorf("database -> question does not have any responses")
 	}
 	return responses, nil
-	//add functionality to return all students enrolled in the class
 }
