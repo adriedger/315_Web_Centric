@@ -46,6 +46,16 @@ func (db *Database) JoinClass(enrollment Enrollment) error {
 	return nil
 }
 
+func (db *Database) GetClasses() ([]Class, error) {
+	classes := []Class{}
+	q := `SELECT * FROM class`
+	err := db.Select(&classes, q)
+	if err != nil {
+		return []Class{}, err
+	}
+	return classes, nil
+}
+
 func (db *Database) AddQuestion(question Question) error {
 	//key attempt
 	classes := []Class{}

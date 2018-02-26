@@ -227,6 +227,23 @@ func handleGetResponses(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func handleGetClasses(w http.ResponseWriter, r *http.Request) {
+	classes, err := db.GetClasses()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("error:", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(classes)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	var err error
 	db, err = OpenDatabase()
@@ -238,7 +255,9 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	router := mux.NewRouter()
+	router.Handle("/", http.FileServer(http.Dir("./static")))
 	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
+	router.HandleFunc("/api/v1/classes", handleGetClasses).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
 	router.HandleFunc("/api/v1/questions/create", handleAddQuestion).Methods("POST")
