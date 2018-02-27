@@ -7,17 +7,31 @@
     <body>
         <h1>Student Response System</h1>
         <h2>Classes</h2>
-        <div id="class_list">
-        </div>
-        <div id ="create">Create:
-            <input type="text" id="class_name_create">
+        <div id="class_list"></div>
+        <div id="create">Create:
+            <input type="text" id="class_name_create" placeholder="Class Name">
             <button id="create_button">Go</button>
+            <div id="create_response"></div>
         </div>
-        <div id = "join">Join:
-            <input type="text" id="class_name_join">
-            <input type="text" id="user_name_join">
+        <div id="join">Join:
+            <input type="text" id="class_name_join" placeholder="Class Name">
+            <input type="text" id="user_name_join", placeholder="User Name">
             <button id="join_button">Go</button>
+            <div id="join_response"></div>
         </div>
+        <div>---</div>
+        <div id="questions">View Questions:
+            <input type="text" id="class_name_questions" placeholder="Class Name">
+            <button id="questions_button">Go</button>
+        </div>
+        <div id="question_list"></div>
+        <div>---</div>
+        <div id="option_selector">Class Options
+            <button id="student_login">Students</button>
+            <button id="creator_login">Creators</button>            
+        </div>
+        <div id="question_options"></div>
+        <div id="responses_list"></div>
     </body>
     <script type="application/javascript" src="test.js"></script>
 </html>
