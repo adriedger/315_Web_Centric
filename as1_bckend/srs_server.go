@@ -64,6 +64,7 @@ func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(class)
 	if err != nil {
@@ -89,6 +90,7 @@ func handleJoinClass(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(enrollment)
 	if err != nil {
@@ -179,6 +181,7 @@ func handleGetQuestions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(questions)
 	if err != nil {
@@ -204,6 +207,7 @@ func handleGetResponses(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(responses)
 	if err != nil {
@@ -248,9 +252,9 @@ func main() {
 	router.HandleFunc("/api/v1/questions/create", handleAddQuestion).Methods("POST")
 	router.HandleFunc("/api/v1/responses/add", handleAddResponse).Methods("POST")
 	router.HandleFunc("/api/v1/responses/modify", handleModifyResponse).Methods("POST")
-	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("DELETE")
+	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("POST")
 	router.HandleFunc("/api/v1/classes/questions/{name}", handleGetQuestions).Methods("GET")
-	router.HandleFunc("/api/v1/questions/responses", handleGetResponses).Methods("GET")
+	router.HandleFunc("/api/v1/questions/responses", handleGetResponses).Methods("POST")
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static")))
 
 	http.ListenAndServe(":8080", router)

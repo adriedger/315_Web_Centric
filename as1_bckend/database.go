@@ -137,14 +137,16 @@ func (db *Database) DeleteQuestion(question Question) error {
 
 func (db *Database) GetQuestions(class_name string) ([]Question, error) {
 	questions := []Question{}
-	q := `SELECT question, class_name FROM questions WHERE class_name = $1`
+	q := `SELECT question, class_name, answer FROM questions WHERE class_name = $1`
 	err := db.Select(&questions, q, class_name)
 	if err != nil {
 		return []Question{}, err
 	}
-	if len(questions) < 1 {
-		return []Question{}, fmt.Errorf("database -> class does not have any questions")
-	}
+	/*
+		if len(questions) < 1 {
+			return []Question{}, fmt.Errorf("database -> class does not have any questions")
+		}
+	*/
 	return questions, nil
 }
 
@@ -166,8 +168,10 @@ func (db *Database) GetResponses(question Question) ([]Response, error) {
 	if err != nil {
 		return []Response{}, err
 	}
-	if len(responses) < 1 {
-		return []Response{}, fmt.Errorf("database -> question does not have any responses")
-	}
+	/*
+		if len(responses) < 1 {
+			return []Response{}, fmt.Errorf("database -> question does not have any responses")
+		}
+	*/
 	return responses, nil
 }
