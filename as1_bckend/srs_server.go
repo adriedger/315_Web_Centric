@@ -45,21 +45,6 @@ type Response struct {
 	Username  string `db:"username"`
 }
 
-func handleGetHome(w http.ResponseWriter, r *http.Request) {
-	home := struct {
-		CreateClassLink string
-		JoinClassLink   string
-	}{"/api/v1/classes/create", "/api/v1/classes/join"}
-
-	w.Header().Set("Content-Type", "application/json")
-	encoder := json.NewEncoder(w)
-	err := encoder.Encode(home)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func handleCreateClass(w http.ResponseWriter, r *http.Request) {
 	var class Class
 	decoder := json.NewDecoder(r.Body)
@@ -255,8 +240,8 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	router := mux.NewRouter()
-	router.Handle("/", http.FileServer(http.Dir("./static")))
-	router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
+	//router.Handle("/", http.FileServer(http.Dir("static")))
+	//router.HandleFunc("/api/v1", handleGetHome).Methods("GET")
 	router.HandleFunc("/api/v1/classes", handleGetClasses).Methods("GET")
 	router.HandleFunc("/api/v1/classes/create", handleCreateClass).Methods("POST")
 	router.HandleFunc("/api/v1/classes/join", handleJoinClass).Methods("POST")
@@ -266,6 +251,7 @@ func main() {
 	router.HandleFunc("/api/v1/questions/delete", handleDeleteQuestion).Methods("DELETE")
 	router.HandleFunc("/api/v1/classes/questions/{name}", handleGetQuestions).Methods("GET")
 	router.HandleFunc("/api/v1/questions/responses", handleGetResponses).Methods("GET")
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("static")))
 
 	http.ListenAndServe(":8080", router)
 }
