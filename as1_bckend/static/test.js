@@ -1,8 +1,7 @@
-// CMPT 315 (Winter 2018)
+// Andre Driedger
 
 function getClasses() {
     let req = new XMLHttpRequest();
-
     req.addEventListener("load", function(evt) {
 		if (req.response) {
 			let data = JSON.parse(req.response);
@@ -11,30 +10,25 @@ function getClasses() {
 			console.log("no response");
 		}
     });
-
     req.open("GET", `http://localhost:8080/api/v1/classes`);
     req.send();
 }
 
 function showClasses(data) {
     let container = document.querySelector("#class_list");
+    container.innerHTML = "Classes"
     while (container.childElementCount > 0) {
 		container.removeChild(container.firstElementChild);
     }
     let table = document.createElement("table");
-
     if (data.length == 0) {
-    	let row = document.createElement("tr");
-		row.innerHTML = `No Classes in the System`
-		table.appendChild(row);
-    }
-   
+    	container.innerHTML = "No Classes in the System";
+    }   
     for (let i = 0; i < data.length; i++) {
 		let row = document.createElement("tr");
 		row.innerHTML = `<td>${data[i].ClassName}</td>`
 		table.appendChild(row);
     }
-
     container.appendChild(table);
 }
 
@@ -51,7 +45,7 @@ function createClass(className) {
 			getClasses();
 			document.getElementById("create_response").innerHTML = `${data.ClassName} created. IMPORTANT. Creator key is: ${data.CreatorKey}`;			
 		} else {
-			document.getElementById("create_response").innerHTML = `UNSUCCESSFUL ${className} not created`;
+			document.getElementById("create_response").innerHTML = `UNSUCCESSFUL: ${className} already exists`;
 		}
 		document.getElementById("class_name_create").value = '';
 	};
@@ -68,14 +62,14 @@ function onJoinClick(evt) {
 function joinClass(className, userName) {
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
-  		//ADD ERROR IF
 		if (this.readyState == 4 && this.status == 200) {
 			let data = JSON.parse(this.response);
-			//getClasses();
-			document.getElementById("join_response").innerHTML = `${data.Username} has joined class: ${data.ClassName}`;
-			document.getElementById("class_name_join").value = '';
-			document.getElementById("user_name_join").value = '';
+			document.getElementById("join_response").innerHTML = `${data.Username} has joined ${data.ClassName}`;
+		} else {
+			document.getElementById("join_response").innerHTML = `UNSUCCESSFUL: ${userName} is already in ${className}`;
 		}
+		document.getElementById("class_name_join").value = '';
+		document.getElementById("user_name_join").value = '';
 	};
 	xhttp.open('POST', 'http://localhost:8080/api/v1/classes/join');
 	xhttp.send(JSON.stringify({ClassName:`${className}`, Username:`${userName}`}));
@@ -87,6 +81,9 @@ function onQuestionsClick() {
 	document.getElementById("question_viewresponses").value = "";
 	document.getElementById("username_student").value = "";
 	document.getElementById("responses_list").innerHTML = "";
+
+	let o = document.querySelector("#option_selector");
+	o.style.display = "block";
 	
 	let className = document.querySelector("#class_name_questions").value;
     getQuestions(className, false);
@@ -108,19 +105,18 @@ function getQuestions(className, creator) {
 
 function showQuestions(data, creator) {
     let container = document.querySelector("#question_list");
+    container.innerHTML = "Questions"
     while (container.childElementCount > 0) {
 		container.removeChild(container.firstElementChild);
     }
     let table = document.createElement("table");
     if (data.length == 0) {
-    	let row = document.createElement("tr");
-		row.innerHTML = `No Questions in this Class`
-		table.appendChild(row);
+    	container.innerHTML = "No Questions in this Class"
     }
     for (let i = 0; i < data.length; i++) {
     	let row = document.createElement("tr");
     	if (creator) {			
-			row.innerHTML = `<td>${data[i].Question} Answer: ${data[i].Answer}</td>`
+			row.innerHTML = `<td>Question: ${data[i].Question} Answer: ${data[i].Answer}</td>`
     	} else {
 			row.innerHTML = `<td>${data[i].Question}</td>`
     	}
@@ -130,10 +126,14 @@ function showQuestions(data, creator) {
 }
 
 function onStudentClick() {
+	let className = document.querySelector("#class_name_questions").value;
+	getQuestions(className, false);
 	document.getElementById("general_responses").innerHTML = "";
 	let s = document.querySelector("#student_options");
 	let c = document.querySelector("#creator_options");
+	let o = document.querySelector("#creator_stuff");
 	c.style.display = "none";
+	o.style.display = "none";
 	s.style.display = "block";
 }
 
@@ -143,6 +143,31 @@ function onCreatorClick() {
 	let c = document.querySelector("#creator_options");
 	s.style.display = "none";
 	c.style.display = "block";
+}
+
+function onVerifyCreatorClick() {
+	let className = document.querySelector("#class_name_questions").value;
+	let classKey = document.querySelector("#class_key").value;
+	verifyCreator(className, classKey)
+}
+
+function verifyCreator(className, classKey) {
+	var xhttp = new XMLHttpRequest();
+  	xhttp.onreadystatechange = function() {
+  		let c = document.querySelector("#creator_stuff");
+		if (this.readyState == 4 && this.status == 200) {
+			getQuestions(className, true);
+			c.style.display = "block";
+			document.getElementById("general_responses").innerHTML = `Key verified`;			
+		} else {
+			c.style.display = "none";
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Key does not match class`;
+		}
+		document.getElementById("question_addquestion").value = '';
+		document.getElementById("answer_addquestion").value = '';
+	};
+	xhttp.open('POST', 'http://localhost:8080/api/v1/questions/responses');
+	xhttp.send(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:``}));
 }
 
 function onAddQuestionClick() {
@@ -157,17 +182,15 @@ function addQuestion(className, classKey, question, answer) {
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			//FIX THIS IN SERVER TO SEND JSON OF ERROR
 			getQuestions(className, true);
 			document.getElementById("general_responses").innerHTML = `Question ${question} created. Answer is ${answer}`;			
 		} else {
-			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL question not created`;
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: question not created`;
 		}
 		document.getElementById("question_addquestion").value = '';
 		document.getElementById("answer_addquestion").value = '';
 	};
 	xhttp.open('POST', 'http://localhost:8080/api/v1/questions/create');
-	//console.log(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`,Answer:`${answer}`}));
 	xhttp.send(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`,Answer:`${answer}`}));	
 }
 
@@ -185,12 +208,11 @@ function deleteQuestion(className, classKey, question) {
 			getQuestions(className, true);
 			document.getElementById("general_responses").innerHTML = `Question ${question} deleted`;			
 		} else {
-			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL Question ${question} not deleted`;
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Question ${question} not deleted`;
 		}
 		document.getElementById("question_deletequestion").value = '';
 	};
 	xhttp.open('POST', 'http://localhost:8080/api/v1/questions/delete');
-	//console.log(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`}));
 	xhttp.send(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`}));
 }
 
@@ -212,20 +234,18 @@ function getStudentResponses(className, classKey, question) {
 		}
     });
     req.open("POST", `http://localhost:8080/api/v1/questions/responses`);
-    //console.log(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`}));
     req.send(JSON.stringify({ClassName:`${className}`,KeyAttempt:`${classKey}`,Question:`${question}`}));
 }
 
 function showStudentResponses(data) {
 	let container = document.querySelector("#responses_list");
+	container.innerHTML = "Responses"
     while (container.childElementCount > 0) {
 		container.removeChild(container.firstElementChild);
     }
     let table = document.createElement("table");
     if (data.length == 0) {
-    	let row = document.createElement("tr");
-		row.innerHTML = `No Responses for this Question`
-		table.appendChild(row);
+    	container.innerHTML = "No Student Responses for this Question"
     }
     for (let i = 0; i < data.length; i++) {
     	let row = document.createElement("tr");		
@@ -247,17 +267,15 @@ function onAddResponseClick() {
 function addResponse(className, userName, question, response) {
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
-  		//FIX THIS IN SERVER TO SEND JSON OF ERROR
 		if (this.readyState == 4 && this.status == 200) {
-			document.getElementById("general_responses").innerHTML = `${response} submitted for question: ${question}`;			
+			document.getElementById("general_responses").innerHTML = `Answer: ${response} Submitted for Question: ${question}`;			
 		} else {
-			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL response not submitted`;
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Response not submitted`;
 		}
 		document.getElementById("question_addresponse").value = '';
 		document.getElementById("response_addresponse").value = '';
 	};
 	xhttp.open('POST', 'http://localhost:8080/api/v1/responses/add');
-	//console.log(JSON.stringify({ClassName:`${className}`,Username:`${userName}`,Question:`${question}`,Response:`${response}`}));
 	xhttp.send(JSON.stringify({ClassName:`${className}`,Username:`${userName}`,Question:`${question}`,Response:`${response}`}));
 }
 
@@ -272,17 +290,15 @@ function onModifyResponseClick() {
 function modifyResponse(className, userName, question, response){
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
-  		//SERVER TO SEND JSON OF ERROR
 		if (this.readyState == 4 && this.status == 200) {
-			document.getElementById("general_responses").innerHTML = `${response} modified for question: ${question}`;			
+			document.getElementById("general_responses").innerHTML = `Answer: ${response} Updated for Question: ${question}`;			
 		} else {
-			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL response not modified`;
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Response not modified`;
 		}
 		document.getElementById("question_modifyresponse").value = '';
 		document.getElementById("response_modifyresponse").value = '';
 	};
 	xhttp.open('POST', 'http://localhost:8080/api/v1/responses/modify');
-	//console.log(JSON.stringify({ClassName:`${className}`,Username:`${userName}`,Question:`${question}`,Response:`${response}`}));
 	xhttp.send(JSON.stringify({ClassName:`${className}`,Username:`${userName}`,Question:`${question}`,Response:`${response}`}));
 }
 
@@ -316,6 +332,9 @@ function addEventListeners() {
 
     let modifyResponseButton = document.querySelector("#modifyresponse_button");
     modifyResponseButton.addEventListener("click", onModifyResponseClick);
+
+    let creatorVerifyButton = document.querySelector("#viewanswers_button");
+    creatorVerifyButton.addEventListener("click", onVerifyCreatorClick);
 }
 
 getClasses();
