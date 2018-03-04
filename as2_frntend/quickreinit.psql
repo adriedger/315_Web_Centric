@@ -1,0 +1,63 @@
+DROP DATABASE IF EXISTS as1_bckend;
+
+CREATE DATABASE as1_bckend;
+
+\c as1_bckend
+
+CREATE TABLE class (
+    class_name text PRIMARY KEY NOT NULL,
+    creator_key text NOT NULL
+);
+
+CREATE TABLE enrollment (
+    enroll_id SERIAL PRIMARY KEY,
+    username text NOT NULL,
+    class_name text REFERENCES class(class_name),
+    UNIQUE(username, class_name)
+);
+
+CREATE Table questions (
+    question_id SERIAL PRIMARY KEY,
+    question text NOT NULL,
+    class_name text REFERENCES class(class_name),
+    answer text NOT NULL,
+    UNIQUE(question, class_name)
+);
+
+CREATE Table responses (
+    response_id SERIAL PRIMARY KEY,
+    enroll_id int REFERENCES enrollment(enroll_id),
+    response text NOT NULL,
+    question_id int REFERENCES questions(question_id) ON DELETE CASCADE,
+    class_name text,
+    username text,
+    question text,
+    UNIQUE(enroll_id, question_id)
+);
+
+insert into class values('cmpt101', '1111');
+insert into class values('cmpt103', '2222');
+insert into enrollment(username, class_name) values('alice', 'cmpt101');
+insert into enrollment(username, class_name) values('bob', 'cmpt101');
+insert into enrollment(username, class_name) values('claire', 'cmpt101');
+insert into enrollment(username, class_name) values('alice', 'cmpt103');
+insert into questions(question, answer, class_name) values('2+2=?', '4', 'cmpt101');
+insert into questions(question, answer, class_name) values('3+3=?', '6', 'cmpt101');
+insert into questions(question, answer, class_name) values('4+4=?', '8', 'cmpt101');
+insert into responses(response, enroll_id, question_id, username, class_name, question)
+select '4', e.enroll_id, q.question_id, e.username, e.class_name, q.question
+from enrollment as e
+inner join questions as q ON e.class_name = 'cmpt101' and e.username = 'alice' and q.class_name = 'cmpt101' AND q.question = '2+2=?';
+insert into responses(response, enroll_id, question_id, username, class_name, question)
+select '3', e.enroll_id, q.question_id, e.username, e.class_name, q.question
+from enrollment as e
+inner join questions as q ON e.class_name = 'cmpt101' and e.username = 'bob' and q.class_name = 'cmpt101' AND q.question = '2+2=?';
+insert into responses(response, enroll_id, question_id, username, class_name, question)
+select '6', e.enroll_id, q.question_id, e.username, e.class_name, q.question
+from enrollment as e
+inner join questions as q ON e.class_name = 'cmpt101' and e.username = 'claire' and q.class_name = 'cmpt101' AND q.question = '3+3=?';
+UPDATE responses SET response = 'hello' WHERE class_name = 'cmpt101' AND username = 'bob' AND question = '2+2=?';
+--DELETE FROM questions WHERE question = '2+2=?' AND class_name = 'cmpt101';
+--select * from questions where class_name = 'cmpt101';
+--SELECT * FROM responses WHERE question = '2+2=?' and class_name = 'cmpt101';
+

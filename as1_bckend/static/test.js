@@ -66,7 +66,7 @@ function joinClass(className, userName) {
 			let data = JSON.parse(this.response);
 			document.getElementById("join_response").innerHTML = `${data.Username} has joined ${data.ClassName}`;
 		} else {
-			document.getElementById("join_response").innerHTML = `UNSUCCESSFUL: ${userName} is already in ${className}`;
+			document.getElementById("join_response").innerHTML = `UNSUCCESSFUL`;
 		}
 		document.getElementById("class_name_join").value = '';
 		document.getElementById("user_name_join").value = '';
@@ -84,6 +84,9 @@ function onQuestionsClick() {
 
 	let o = document.querySelector("#option_selector");
 	o.style.display = "block";
+
+    let c = document.querySelector("#creator_stuff");
+    c.style.display = "none";
 	
 	let className = document.querySelector("#class_name_questions").value;
     getQuestions(className, false);
@@ -129,6 +132,9 @@ function onStudentClick() {
 	let className = document.querySelector("#class_name_questions").value;
 	getQuestions(className, false);
 	document.getElementById("general_responses").innerHTML = "";
+	document.getElementById("responses_list").innerHTML = "";
+    document.getElementById("class_key").value = '';
+	document.getElementById("question_viewresponses").value = "";
 	let s = document.querySelector("#student_options");
 	let c = document.querySelector("#creator_options");
 	let o = document.querySelector("#creator_stuff");
@@ -185,7 +191,7 @@ function addQuestion(className, classKey, question, answer) {
 			getQuestions(className, true);
 			document.getElementById("general_responses").innerHTML = `Question ${question} created. Answer is ${answer}`;			
 		} else {
-			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: question not created`;
+			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Question not created`;
 		}
 		document.getElementById("question_addquestion").value = '';
 		document.getElementById("answer_addquestion").value = '';
@@ -268,7 +274,7 @@ function addResponse(className, userName, question, response) {
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			document.getElementById("general_responses").innerHTML = `Answer: ${response} Submitted for Question: ${question}`;			
+			document.getElementById("general_responses").innerHTML = `Answer: ${response} submitted for Question: ${question}`;			
 		} else {
 			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Response not submitted`;
 		}
@@ -291,7 +297,7 @@ function modifyResponse(className, userName, question, response){
 	var xhttp = new XMLHttpRequest();
   	xhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
-			document.getElementById("general_responses").innerHTML = `Answer: ${response} Updated for Question: ${question}`;			
+			document.getElementById("general_responses").innerHTML = `Answer: ${response} updated for Question: ${question}`;			
 		} else {
 			document.getElementById("general_responses").innerHTML = `UNSUCCESSFUL: Response not modified`;
 		}

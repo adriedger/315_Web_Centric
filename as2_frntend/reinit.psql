@@ -1,0 +1,37 @@
+DROP DATABASE IF EXISTS as1_bckend;
+
+CREATE DATABASE as1_bckend;
+
+\c as1_bckend
+
+CREATE TABLE class (
+    class_name text PRIMARY KEY NOT NULL,
+    creator_key text NOT NULL
+);
+
+CREATE TABLE enrollment (
+    enroll_id SERIAL PRIMARY KEY,
+    username text NOT NULL,
+    class_name text REFERENCES class(class_name),
+    UNIQUE(username, class_name)
+);
+
+CREATE Table questions (
+    question_id SERIAL PRIMARY KEY,
+    question text NOT NULL,
+    class_name text REFERENCES class(class_name),
+    answer text NOT NULL,
+    UNIQUE(question, class_name)
+);
+
+CREATE Table responses (
+    response_id SERIAL PRIMARY KEY,
+    enroll_id int REFERENCES enrollment(enroll_id),
+    response text NOT NULL,
+    question_id int REFERENCES questions(question_id) ON DELETE CASCADE,
+    class_name text,
+    username text,
+    question text,
+    UNIQUE(enroll_id, question_id)
+);
+

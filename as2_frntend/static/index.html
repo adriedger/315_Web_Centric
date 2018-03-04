@@ -1,0 +1,76 @@
+<!DOCCTYPE html>
+<html>
+    <head>
+        <title>Andre's Student Response System</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <h1>Student Response System</h1>
+        <div id="class_list"> Classes</div>
+        <div id="create">Create Class:
+            <input type="text" id="class_name_create" placeholder="Class Name">
+            <button id="create_button">Go</button>
+            <div id="create_response"></div>
+        </div>
+        <div id="join">Join Class:
+            <input type="text" id="class_name_join" placeholder="Class Name">
+            <input type="text" id="user_name_join", placeholder="User Name">
+            <button id="join_button">Go</button>
+            <div id="join_response"></div>
+        </div>
+
+        <div id="questions">View Questions:
+            <input type="text" id="class_name_questions" placeholder="Class Name">
+            <button id="questions_button">Go</button>
+        </div>
+        <div id="question_list"></div>
+        <div id="option_selector" style="display: none">Class Options:
+            <button id="student_button">Student</button>
+            <button id="creator_button">Creator</button>            
+        </div>
+        <div id="student_options" style="display: none;">Student Portal
+            <input type="text" id="username_student" placeholder="User Name">
+            <!button id="viewresponse_button"><!Verify/View Responses><!/button>
+            <div>
+                Add Respose: 
+                <input type="text" id="question_addresponse" placeholder="Question">
+                <input type="text" id="response_addresponse" placeholder="Response">
+                <button id="addresponse_button">Go</button>
+            </div>
+            <div>
+                Modify Respose: 
+                <input type="text" id="question_modifyresponse" placeholder="Question">
+                <input type="text" id="response_modifyresponse" placeholder="New Response">
+                <button id="modifyresponse_button">Go</button>
+            </div>
+        </div>
+        <div id="creator_options" style="display: none;">Creator Portal
+            <input type="text" id="class_key" placeholder="Class Key">
+            <button id="viewanswers_button">Verify/View Answers</button>
+            <div id="creator_stuff" style="display: none;">
+                <div>
+                    Add Question: 
+                    <input type="text" id="question_addquestion" placeholder="Question">
+                    <input type="text" id="answer_addquestion" placeholder="Answer">
+                    <button id="addquestion_button">Go</button>
+                </div>
+                <div>
+                    Delete Question: 
+                    <input type="text" id="question_deletequestion" placeholder="Question">
+                    <button id="deletequestion_button">Go</button>
+                </div>
+                <div>
+                    View Student Responses: 
+                    <input type="text" id="question_viewresponses" placeholder="Question">
+                    <button id="viewresponses_button">Go</button>
+                </div>
+            </div>
+            <div id="responses_list"></div>
+        </div>
+        
+        <div id="general_responses"></div>
+    </body>
+    <script type="application/javascript" src="test.js"></script>
+</html>
+

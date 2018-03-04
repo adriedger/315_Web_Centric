@@ -1,0 +1,9 @@
+wget -O- -S -q localhost:8080/api/v1
+wget --post-data="{\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/create
+wget --post-data="{\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/classes/join
+wget --post-data="{\"Question\":\"2+2=?\",\"Answer\":\"4\",\"KeyAttempt\":\"####\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/questions/create
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"3\",\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/add
+wget --post-data="{\"Question\":\"2+2=?\",\"Response\":\"4\",\"Username\":\"Alice\",\"ClassName\":\"CMPT101\"}" -O- -S -q localhost:8080/api/v1/responses/modify
+wget --method=DELETE --body-data="{\"Question\":\"2+2=?\",\"ClassName\":\"CMPT101\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/delete
+wget -O- -S -q localhost:8080/api/v1/classes/questions/CMPT101
+wget --method=GET --body-data="{\"Question\":\"2+2=?\",\"ClassName\":\"CMPT101\",\"KeyAttempt\":\"####\"}" -O- -S -q localhost:8080/api/v1/questions/responses
